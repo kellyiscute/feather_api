@@ -7,7 +7,6 @@ include: package:pedantic/analysis_options.yaml
 # Uncomment to specify additional rules.
 linter:
   rules:
-    always_specify_types: true
     omit_local_variable_types: false
     prefer_single_quotes: false
     unnecessary_this: false

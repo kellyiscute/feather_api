@@ -20,32 +20,27 @@ void main(List<String> args) async {
   BytesBuilder builder = BytesBuilder();
   List<Uint8List> lines = [];
   httpServer.listen((req) {
+    print(req.method);
+    print(req.headers.contentType?.mimeType);
     String sBoundary = req.headers.contentType!.parameters["boundary"]!;
-    int boundary1 = AsciiEncoder().convert(sBoundary)[0];
     int boundaryLast = sBoundary.codeUnitAt(sBoundary.length - 1);
     List<int> bBoundary =
         AsciiEncoder().convert(sBoundary).toList(growable: false);
     req.listen(
       (data) {
-        data.forEach((element) {
-          builder.addByte(element);
-          Uint8List b = builder.toBytes();
-          if (element == boundaryLast) {
-            if (builder.length >= bBoundary.length) {
-              lines.add(builder.toBytes());
-              print(AsciiDecoder().convert(b
-                  .getRange(b.length - bBoundary.length - 1, b.length)
-                  .toList()));
-            }
-          }
-        });
-      },
-      onDone: () {
-        lines.forEach((element) {
-          if (element.take(bBoundary.length).toList() == bBoundary) {
-            print("boundary!");
-          }
-        });
+        print(Utf8Decoder().convert(data));
+        // data.forEach((element) {
+        //   builder.addByte(element);
+        //   Uint8List b = builder.toBytes();
+        //   if (element == boundaryLast) {
+        //     if (builder.length >= bBoundary.length) {
+        //       lines.add(builder.toBytes());
+        //       print(AsciiDecoder().convert(b
+        //           .getRange(b.length - bBoundary.length - 1, b.length)
+        //           .toList()));
+        //     }
+        //   }
+        // });
       },
     );
   });
