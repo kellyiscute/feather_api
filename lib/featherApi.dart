@@ -6,7 +6,7 @@ library featherApi;
 import 'dart:io';
 export 'src/application.dart';
 export 'src/extend.dart';
-export 'src/url_resolver.dart';
+export 'src/route.dart';
 
 // TODO: Export any libraries intended for clients of this package.
 
