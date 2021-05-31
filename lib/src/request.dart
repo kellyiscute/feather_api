@@ -22,16 +22,8 @@ abstract class BaseRequest {
         this.rawRequest = request;
 }
 
-class GetRequest extends BaseRequest {
-  GetRequest(HttpRequest request) : super(request);
-  @override
-  dynamic get body => throw Exception("Body not applicable for GET verb");
-}
-
-class PostRequest extends BaseRequest {
-  PostRequest(HttpRequest request) : super(request) {
-    request.listen((event) {});
-  }
+class ParsedRequest extends BaseRequest {
+  ParsedRequest(HttpRequest request) : super(request);
 
   @override
   // TODO: implement body

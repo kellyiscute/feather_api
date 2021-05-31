@@ -3,11 +3,7 @@
 /// More dartdocs go here.
 library featherApi;
 
-import 'dart:convert';
 import 'dart:io';
-
-import 'dart:typed_data';
-
 export 'src/application.dart';
 export 'src/extend.dart';
 export 'src/url_resolver.dart';
