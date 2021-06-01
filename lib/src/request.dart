@@ -26,6 +26,5 @@ class ParsedRequest extends BaseRequest {
   ParsedRequest(HttpRequest request) : super(request);
 
   @override
-  // TODO: implement body
   get body => throw UnimplementedError();
 }

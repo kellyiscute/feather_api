@@ -3,13 +3,13 @@ import 'dart:html';
 import 'package:featherApi/featherApi.dart';
 
 import '../featherApi.dart';
-import '../featherApi.dart';
 
 typedef RequestHandlerDelegate = Future<void> Function(HttpRequest req);
 
 abstract class Controller {
   String get baseUrl;
   String get debugName => "<no-name>";
+  final Map<String, RequestHandlerDelegate> directPattern = {};
   final Map<CompiledRoute, RequestHandlerDelegate> compiledRoutePattern = {};
   final List<Pattern> routes = [];
   Application _app;
@@ -17,7 +17,14 @@ abstract class Controller {
 
   Controller(this._app);
 
-  Future<bool> resolveUrl() async => true;
+  Future<RequestHandlerDelegate?> resolveUrl(String url) async {
+    return await Future(() {
+      return directPattern[url] ??
+          compiledRoutePattern.entries
+              .firstWhere((element) => element.key.resolves(url))
+              .value;
+    });
+  }
 
   String getRegexRep(String type) {
     switch (type) {
@@ -44,6 +51,10 @@ abstract class Controller {
         "?<$paramName>${getRegexRep(type)}",
       );
     });
+    if (compiledRegex == route) {
+      this.directPattern[route] = handler;
+      return;
+    }
     this.compiledRoutePattern[
         CompiledRoute(match: compiledRegex, method: method)] = handler;
   }
@@ -52,5 +63,7 @@ abstract class Controller {
     this.route(HttpMethod.POST, route, handler);
   }
 
-  void get() {}
+  void get(String route, RequestHandlerDelegate handler) {
+    this.route(HttpMethod.GET, route, handler);
+  }
 }
