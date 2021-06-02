@@ -1,10 +1,12 @@
-import 'dart:html';
+import 'dart:io';
 
 import 'package:featherApi/featherApi.dart';
+import 'package:featherApi/src/request.dart';
+import 'package:featherApi/src/response.dart';
 
 import '../featherApi.dart';
 
-typedef RequestHandlerDelegate = Future<void> Function(HttpRequest req);
+typedef RequestHandlerDelegate = Future<Response> Function(ParsedRequest req);
 
 abstract class Controller {
   String get baseUrl;
@@ -17,13 +19,20 @@ abstract class Controller {
 
   Controller(this._app);
 
-  Future<RequestHandlerDelegate?> resolveUrl(String url) async {
-    return await Future(() {
-      return directPattern[url] ??
-          compiledRoutePattern.entries
-              .firstWhere((element) => element.key.resolves(url))
-              .value;
-    });
+  void resolve(HttpRequest request) async {
+    String path = request.requestedUri.path;
+    print(path);
+    if (directPattern.containsKey(path)) {
+      await directPattern[path]!(ParsedRequest(request));
+    } else {
+      compiledRoutePattern.forEach((key, value) async {
+        var result = key.resolves(path);
+        if (result != null) {
+          await value(ParsedRequest(request, urlParams: result));
+          // TODO
+        }
+      });
+    }
   }
 
   String getRegexRep(String type) {
@@ -55,8 +64,9 @@ abstract class Controller {
       this.directPattern[route] = handler;
       return;
     }
+    compiledRegex += r"$";
     this.compiledRoutePattern[
-        CompiledRoute(match: compiledRegex, method: method)] = handler;
+        CompiledRoute(match: RegExp(compiledRegex), method: method)] = handler;
   }
 
   void post(String route, RequestHandlerDelegate handler) {
@@ -65,5 +75,21 @@ abstract class Controller {
 
   void get(String route, RequestHandlerDelegate handler) {
     this.route(HttpMethod.GET, route, handler);
+  }
+
+  void patch(String route, RequestHandlerDelegate handler) {
+    this.route(HttpMethod.PATCH, route, handler);
+  }
+
+  void delete(String route, RequestHandlerDelegate handler) {
+    this.route(HttpMethod.DELETE, route, handler);
+  }
+
+  void put(String route, RequestHandlerDelegate handler) {
+    this.route(HttpMethod.PUT, route, handler);
+  }
+
+  void options(String route, RequestHandlerDelegate handler) {
+    this.route(HttpMethod.OPTIONS, route, handler);
   }
 }
