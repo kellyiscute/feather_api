@@ -11,8 +11,8 @@ class C extends Controller {
   String get baseUrl => "/";
 }
 
-void main() {
+void main() async {
   var application = Application("127.0.0.1", 9800);
   application.registerController(C(application));
-  application.run();
+  await application.run();
 }

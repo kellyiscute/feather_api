@@ -25,11 +25,11 @@ abstract class Controller {
     if (directPattern.containsKey(path)) {
       await directPattern[path]!(ParsedRequest(request));
     } else {
-      compiledRoutePattern.forEach((key, value) async {
-        var result = key.resolves(path);
+      compiledRoutePattern.forEach((pattern, run) async {
+        var result = pattern.resolves(path);
         if (result != null) {
-          await value(ParsedRequest(request, urlParams: result));
-          // TODO
+          await run(ParsedRequest(request, urlParams: result));
+          // TODO: process request
         }
       });
     }
