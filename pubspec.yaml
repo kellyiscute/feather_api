@@ -10,6 +10,8 @@ dependencies:
   bytes_io:
   multipart: 
   logger:
+  html_unescape:
+  nanoid:
 
 dev_dependencies:
   pedantic: ^1.9.0
