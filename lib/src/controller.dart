@@ -14,25 +14,38 @@ abstract class Controller {
   final Map<String, RequestHandlerDelegate> directPattern = {};
   final Map<CompiledRoute, RequestHandlerDelegate> compiledRoutePattern = {};
   final List<Pattern> routes = [];
-  Application _app;
+  final Application _app;
   Application get app => _app;
 
   Controller(this._app);
 
-  void resolve(HttpRequest request) async {
+  Future<void> resolve(HttpRequest request) async {
     String path = request.requestedUri.path;
     print(path);
+    Response? response;
     if (directPattern.containsKey(path)) {
-      await directPattern[path]!(ParsedRequest(request));
+      final parsed = ParsedRequest(request);
+      await parsed.parse();
+      response = await directPattern[path]!(parsed);
     } else {
-      compiledRoutePattern.forEach((pattern, run) async {
-        var result = pattern.resolves(path);
+      for (var pattern in compiledRoutePattern.entries) {
+        var result = pattern.key.resolves(path);
         if (result != null) {
-          await run(ParsedRequest(request, urlParams: result));
-          // TODO: process request
+          final parsed = ParsedRequest(request, urlParams: result);
+          await parsed.parse();
+          response = await pattern.value(parsed);
+          break;
         }
-      });
+      }
     }
+
+    if (response == null) {
+      _app.logger.e("404");
+      request.response.statusCode = 404;
+      await request.response.close();
+    }
+    await response?.constructResponse(request);
+    await request.response.close();
   }
 
   String getRegexRep(String type) {

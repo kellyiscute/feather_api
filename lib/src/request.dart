@@ -1,4 +1,10 @@
+import 'dart:convert';
 import 'dart:io';
+
+import 'dart:typed_data';
+
+import 'package:html_unescape/html_unescape.dart';
+import 'package:multipart/multipart.dart';
 
 abstract class BaseRequest {
   final HttpHeaders headers;
@@ -28,6 +34,38 @@ class ParsedRequest extends BaseRequest {
   ParsedRequest(HttpRequest request, {Map<String, dynamic>? urlParams})
       : super(request, urlParams: urlParams);
 
+  dynamic _body;
+  final Uint8List _rawBody = Uint8List(0);
+
+  Future<void> parse() async {
+    final contentType = rawRequest.headers.contentType;
+
+    // handle multipart
+    if (contentType?.value == "multipart/form-data") {
+      _body = await Multipart(rawRequest).load();
+      return;
+    }
+
+    // load all data if not multipart
+    await for (final data in rawRequest) {
+      _rawBody.addAll(data);
+    }
+
+    if (contentType == ContentType.json) {
+      _body = jsonDecode(Utf8Decoder().convert(_rawBody));
+    } else if (contentType?.value == "application/x-www-urlencoded") {
+      _body = Utf8Decoder().convert(_rawBody);
+      final splitted = (_body as String).split("&");
+      _body = Map.fromEntries(splitted.map((e) {
+        final keyValue = e.split("=");
+        return MapEntry(HtmlUnescape().convert(keyValue[0]),
+            HtmlUnescape().convert(keyValue[1]));
+      }));
+    } else if (contentType == ContentType.text) {
+      _body = Utf8Decoder().convert(_rawBody);
+    }
+  }
+
   @override
-  get body => throw UnimplementedError();
+  get body => _body;
 }

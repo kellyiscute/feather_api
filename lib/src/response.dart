@@ -5,15 +5,17 @@ import 'package:featherApi/src/multipart_file.dart';
 import 'package:nanoid/async.dart';
 
 abstract class Response {
+  abstract final dynamic data;
+  final Map<String, String> headers = {};
+  Response();
   factory Response.json(Object data) {
     return JsonResponse(data);
   }
-  Response();
   factory Response.XwwwFormUrlEncoded(Map<String, String> data) {
     return XwwwFormUrlEncodedResponse(data);
   }
-  factory Response.formData() {
-    throw UnimplementedError();
+  factory Response.formData(Map<String, dynamic> data) {
+    return FormDataResponse(data);
   }
 
   Future<void> constructResponse(HttpRequest request);
@@ -34,8 +36,8 @@ mixin ResponseConstructorMixin on Response {
 class XwwwFormUrlEncodedResponse extends Response
     with ResponseConstructorMixin {
   final List<Cookie> cookies = [];
-  final Map<String, String> data;
-  final Map<String, String> headers = {};
+  @override
+  final dynamic data;
 
   XwwwFormUrlEncodedResponse(Map<String, String> data) : this.data = data;
 
@@ -55,7 +57,9 @@ class XwwwFormUrlEncodedResponse extends Response
 
 class JsonResponse extends Response with ResponseConstructorMixin {
   List<Cookie> cookies = [];
+  @override
   Map<String, String> headers = {};
+  @override
   late Map data;
 
   JsonResponse(Object data) {
@@ -72,8 +76,10 @@ class JsonResponse extends Response with ResponseConstructorMixin {
 }
 
 class FormDataResponse extends Response with ResponseConstructorMixin {
+  @override
   final Map<String, dynamic> data;
   final List<Cookie> cookies = [];
+  @override
   final Map<String, String> headers = {};
 
   FormDataResponse(Map<String, dynamic> data) : this.data = data;

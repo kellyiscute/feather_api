@@ -8,12 +8,12 @@ class Application {
   final InternetAddress listenAddr;
   final int listenPort;
   final List<Controller> _controllers = [];
-  final Logger _logger;
+  final Logger logger;
 
-  Application([String address = "0.0.0.0", int port = 8080])
+  Application({String address = "0.0.0.0", int port = 8080})
       : this.listenAddr = InternetAddress(address),
         this.listenPort = port,
-        this._logger = Logger(printer: PrettyPrinter());
+        this.logger = Logger(printer: PrettyPrinter());
 
   void registerController(Controller controller) {
     _controllers.add(controller);
@@ -21,14 +21,14 @@ class Application {
 
   Future<void> run() async {
     HttpServer server = await HttpServer.bind(listenAddr, listenPort);
-    _logger.i(
+    logger.i(
       "Server started at $listenAddr:$listenPort with ${_controllers.length} controller registered",
       null,
       StackTrace.empty,
     );
     await for (final request in server) {
       unawaited(Future.forEach<Controller>(_controllers, (c) async {
-        c.resolve(request);
+        await c.resolve(request);
       }));
     }
   }

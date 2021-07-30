@@ -1,9 +1,8 @@
 /// Support for doing something awesome.
 ///
 /// More dartdocs go here.
-library featherApi;
+library feather_api;
 
-import 'dart:io';
 export 'src/application.dart';
 export 'src/controller.dart';
 export 'src/route.dart';
