@@ -22,10 +22,7 @@ class Application {
   Future<void> run() async {
     HttpServer server = await HttpServer.bind(listenAddr, listenPort);
     logger.i(
-      "Server started at $listenAddr:$listenPort with ${_controllers.length} controller registered",
-      null,
-      StackTrace.empty,
-    );
+        "Server started at $listenAddr:$listenPort with ${_controllers.length} controller registered");
     await for (final request in server) {
       unawaited(Future.forEach<Controller>(_controllers, (c) async {
         await c.resolve(request);

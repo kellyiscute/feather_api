@@ -35,7 +35,7 @@ class ParsedRequest extends BaseRequest {
       : super(request, urlParams: urlParams);
 
   dynamic _body;
-  final Uint8List _rawBody = Uint8List(0);
+  final List<int> _rawBody = <int>[];
 
   Future<void> parse() async {
     final contentType = rawRequest.headers.contentType;

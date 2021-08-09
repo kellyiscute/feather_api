@@ -13,20 +13,23 @@ abstract class Controller {
   String get debugName => "<no-name>";
   final Map<String, RequestHandlerDelegate> directPattern = {};
   final Map<CompiledRoute, RequestHandlerDelegate> compiledRoutePattern = {};
-  final List<Pattern> routes = [];
   final Application _app;
   Application get app => _app;
 
   Controller(this._app);
 
   Future<void> resolve(HttpRequest request) async {
-    String path = request.requestedUri.path;
-    print(path);
+    if (!request.requestedUri.path.startsWith(this.baseUrl)) return;
+    final path = request.method +
+        " " +
+        request.requestedUri.path.replaceFirst(this.baseUrl, "");
+    _app.logger.i(path);
     Response? response;
     if (directPattern.containsKey(path)) {
       final parsed = ParsedRequest(request);
       await parsed.parse();
       response = await directPattern[path]!(parsed);
+      await response.constructResponse(request);
     } else {
       for (var pattern in compiledRoutePattern.entries) {
         var result = pattern.key.resolves(path);
@@ -34,6 +37,7 @@ abstract class Controller {
           final parsed = ParsedRequest(request, urlParams: result);
           await parsed.parse();
           response = await pattern.value(parsed);
+          await response.constructResponse(request);
           break;
         }
       }
@@ -44,16 +48,15 @@ abstract class Controller {
       request.response.statusCode = 404;
       await request.response.close();
     }
-    await response?.constructResponse(request);
     await request.response.close();
   }
 
   String getRegexRep(String type) {
     switch (type) {
       case "int":
-        return r"[0-9]*";
+        return r"[0-9]+";
       case "str":
-        return r"A-z0-9_-";
+        return r"[A-z0-9_-]+";
       case "any":
         return r".*";
       default:
@@ -70,11 +73,12 @@ abstract class Controller {
       final String type = m.namedGroup("type")!;
       compiledRegex = compiledRegex.replaceAll(
         m.group(0)!,
-        "?<$paramName>${getRegexRep(type)}",
+        "(?<$paramName>(${getRegexRep(type)}))",
       );
     });
     if (compiledRegex == route) {
-      this.directPattern[route] = handler;
+      this.directPattern[method.toString().split(".").last + " " + route] =
+          handler;
       return;
     }
     compiledRegex += r"$";

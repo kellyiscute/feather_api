@@ -24,7 +24,7 @@ abstract class Response {
 mixin ResponseConstructorMixin on Response {
   void addHeaders(HttpRequest request, Map<String, String> headers) {
     for (var header in headers.entries) {
-      request.headers.add(header.key, header.value);
+      request.response.headers.add(header.key, header.value);
     }
   }
 
@@ -60,10 +60,10 @@ class JsonResponse extends Response with ResponseConstructorMixin {
   @override
   Map<String, String> headers = {};
   @override
-  late Map data;
+  late String data;
 
-  JsonResponse(Object data) {
-    data = jsonEncode(data);
+  JsonResponse(Object? data) {
+    this.data = jsonEncode(data);
   }
 
   @override
