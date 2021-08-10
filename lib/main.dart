@@ -3,9 +3,9 @@ import 'package:featherApi/src/response.dart';
 
 class MyController extends Controller {
   MyController(Application app) : super(app) {
-    get(
+    post(
       "/<str:name>",
-      (req) async => Response.json(req.urlParams)
+      (req) async => Response.json(req.body)
         ..headers.addAll(
           {
             "Access-Control-Allow-Origin": "*",

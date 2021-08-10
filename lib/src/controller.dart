@@ -31,7 +31,8 @@ abstract class Controller {
       response = await directPattern[path]!(parsed);
       await response.constructResponse(request);
     } else {
-      for (var pattern in compiledRoutePattern.entries) {
+      for (var pattern in compiledRoutePattern.entries.where((element) =>
+          element.key.method.toString().endsWith(request.method))) {
         var result = pattern.key.resolves(path);
         if (result != null) {
           final parsed = ParsedRequest(request, urlParams: result);

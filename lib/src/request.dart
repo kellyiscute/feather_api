@@ -51,18 +51,20 @@ class ParsedRequest extends BaseRequest {
       _rawBody.addAll(data);
     }
 
-    if (contentType == ContentType.json) {
+    if (contentType?.value == ContentType.json.value) {
       _body = jsonDecode(Utf8Decoder().convert(_rawBody));
-    } else if (contentType?.value == "application/x-www-urlencoded") {
+    } else if (contentType?.value == "application/x-www-form-urlencoded") {
       _body = Utf8Decoder().convert(_rawBody);
       final splitted = (_body as String).split("&");
       _body = Map.fromEntries(splitted.map((e) {
         final keyValue = e.split("=");
-        return MapEntry(HtmlUnescape().convert(keyValue[0]),
-            HtmlUnescape().convert(keyValue[1]));
+        return MapEntry(
+            Uri.decodeComponent(keyValue[0]), Uri.decodeComponent(keyValue[1]));
       }));
-    } else if (contentType == ContentType.text) {
+    } else if (contentType?.value == ContentType.text.value) {
       _body = Utf8Decoder().convert(_rawBody);
+    } else {
+      _body = _rawBody;
     }
   }
 
