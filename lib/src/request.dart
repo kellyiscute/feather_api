@@ -1,9 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'dart:typed_data';
-
-import 'package:html_unescape/html_unescape.dart';
 import 'package:multipart/multipart.dart';
 
 abstract class BaseRequest {
