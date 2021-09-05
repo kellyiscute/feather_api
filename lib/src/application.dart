@@ -13,7 +13,8 @@ class Application {
   Application({String address = "0.0.0.0", int port = 8080})
       : this.listenAddr = InternetAddress(address),
         this.listenPort = port,
-        this.logger = Logger(printer: PrettyPrinter());
+        this.logger =
+            Logger(printer: PrettyPrinter(), filter: ProductionFilter());
 
   void registerController(Controller controller) {
     _controllers.add(controller);

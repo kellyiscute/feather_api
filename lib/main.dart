@@ -5,14 +5,17 @@ class MyController extends Controller {
   MyController(Application app) : super(app) {
     post(
       "/<str:name>",
-      (req) async => Response.json(req.body)
-        ..headers.addAll(
-          {
-            "Access-Control-Allow-Origin": "*",
-            "Access-Control-Allow-Methods": "*",
-            "Access-Control-Allow-Headers": "*",
-          },
-        ),
+      (req) async {
+        app.logger.i(req.headers["asdf"]);
+        return Response.json(req.body)
+          ..headers.addAll(
+            {
+              "Access-Control-Allow-Origin": "*",
+              "Access-Control-Allow-Methods": "*",
+              "Access-Control-Allow-Headers": "*",
+            },
+          );
+      },
     );
     options(
       "/<str:name>",
