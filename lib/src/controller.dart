@@ -1,10 +1,8 @@
 import 'dart:io';
 
-import 'package:featherApi/featherApi.dart';
-import 'package:featherApi/src/request.dart';
-import 'package:featherApi/src/response.dart';
-
 import '../featherApi.dart';
+import 'request.dart';
+import 'response.dart';
 
 typedef RequestHandlerDelegate = Future<Response> Function(ParsedRequest req);
 
