@@ -1,6 +1,8 @@
 import 'dart:io';
+import 'dart:mirrors';
 
 import 'package:featherApi/featherApi.dart';
+import 'package:featherApi/src/annotations.dart';
 import 'package:featherApi/src/request.dart';
 import 'package:featherApi/src/response.dart';
 import 'package:logger/logger.dart';
@@ -22,6 +24,60 @@ class Application {
         this.listenPort = port,
         this.logger =
             Logger(printer: PrettyPrinter(), filter: ProductionFilter());
+
+  void registerAnnotatedMethods(Controller controller) {
+    final mirror = reflect(controller);
+    for (final member in mirror.type.instanceMembers.entries) {
+      if (member.value.metadata.isNotEmpty) {
+        member.value.metadata.forEach((element) {
+          if (element.type.isSubclassOf(reflectClass(ControllerMethods))) {
+            if (element.reflectee is GET) {
+              controller.route(
+                HttpMethod.GET,
+                element.reflectee.path,
+                (req) => mirror.invoke(member.key, [req]).reflectee,
+              );
+            }
+            if (element.reflectee is POST) {
+              controller.route(
+                HttpMethod.POST,
+                element.reflectee.path,
+                (req) => mirror.invoke(member.key, [req]).reflectee,
+              );
+            }
+            if (element.reflectee is PUT) {
+              controller.route(
+                HttpMethod.PUT,
+                element.reflectee.path,
+                (req) => mirror.invoke(member.key, [req]).reflectee,
+              );
+            }
+            if (element.reflectee is PATCH) {
+              controller.route(
+                HttpMethod.PATCH,
+                element.reflectee.path,
+                (req) => mirror.invoke(member.key, [req]).reflectee,
+              );
+            }
+            if (element.reflectee is DELETE) {
+              controller.route(
+                HttpMethod.DELETE,
+                element.reflectee.path,
+                (req) => mirror.invoke(member.key, [req]).reflectee,
+              );
+            }
+            if (element.reflectee is OPTIONS) {
+              controller.route(
+                HttpMethod.OPTIONS,
+                element.reflectee.path,
+                (req) => mirror.invoke(member.key, [req]).reflectee,
+              );
+            }
+          }
+        });
+      }
+    }
+  }
 
   void registerController(Controller controller) {
     _controllers.add(controller);
